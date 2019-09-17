@@ -1,0 +1,190 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+</head>
+<body>
+<script>
+var d = document
+var el = 'createElement'
+var ap = 'appendChild'
+var text = 'createTextNode'
+
+var colors = [
+	'red',
+	'green',
+	'blue',
+	'yellow',
+	'pink',
+	'cyan',
+	'orange',
+	'grey',
+	'magenta',
+	'khaki'
+]
+
+var defaults = {
+	tracks: 30,
+	players: 6,
+	tracks_per_player: 4,
+	last_player_overflow: true,
+}
+
+function make_graph(incoming_args) {
+	var args = Object.assign({}, defaults, incoming_args)
+
+	var tracks_finished = 0
+	var current_player = 0
+	var tracks_finished_per_player = []
+
+	while(1) {
+		if (tracks_finished >= args.tracks) { break }
+
+		var player_track_el = d[el]('pre')
+		player_track_el.style.backgroundColor = colors[current_player]
+		player_track_el.style.display = 'inline-block'
+		player_track_el_text = current_player < 9 ? String(current_player + 1) : String.fromCharCode(56 + current_player)
+		player_track_el_text = player_track_el_text.repeat(args.tracks_per_player)
+		player_track_el[ap](d[text](player_track_el_text))
+		args.target[ap](player_track_el)
+
+		tracks_finished += args.tracks_per_player
+		if(!tracks_finished_per_player[current_player]) { tracks_finished_per_player[current_player] = 0 }
+		tracks_finished_per_player[current_player] += args.tracks_per_player
+		current_player++
+		if (current_player == args.players) { current_player = 0 }
+	}
+
+	return { tracks_finished_per_player: tracks_finished_per_player }
+}
+
+function make_legend(incoming_args) {
+	var args = Object.assign({}, defaults, incoming_args)
+
+	var this_target = args.target
+
+	var fieldset = d[el]('fieldset')
+	var legend = d[el]('legend')
+	var players_plural = [ 'игроков', 'игрок', 'игрока']
+	legend[ap](d[text](args.players + " " + players_plural[plural_form_n(args.players)]))
+
+	fieldset[ap](legend)
+
+	var result = []
+
+	args.target = fieldset
+	args.tracks_per_player = 4; result[4] = make_graph(args)
+	args.target[ap](d[el]('div'))
+	args.tracks_per_player = 3; result[3] = make_graph(args)
+
+	function td() {
+		var elem = d[el]("td")
+		elem.style.border = "1px solid black"
+		return elem
+	}
+
+	function th() {
+		var elem = d[el]("th")
+		elem.style.border = "1px solid black"
+		return elem
+	}
+
+	function plural_form_n(n) {
+	    if (n >= 5 && n <= 20) { return 0 }
+	    n %= 10
+	    if (n === 1) { return 1 }
+	    if (n >= 2 && n <= 4) { return 2 }
+	    return 0
+	}
+
+	var summary_table = d[el]("table")
+	summary_table.style.borderCollapse = "collapse"
+	var row, cell
+	row = d[el]("tr"); summary_table[ap](row)
+	cell = th(); row[ap](cell); cell[ap](d[text]("Игрок"))
+	cell = th(); row[ap](cell); cell[ap](d[text]("Сыграно по 4"))
+	cell = th(); row[ap](cell); cell[ap](d[text]("Сыграно по 3"))
+
+	for (var idx = 0; idx < args.players; idx++) {
+		row = d[el]("tr"); row.style.backgroundColor = colors[idx]; summary_table[ap](row)
+		cell = td(); row[ap](cell); cell[ap](d[text](idx + 1))
+		cell = td(); row[ap](cell); cell[ap](d[text](result[4].tracks_finished_per_player[idx] || 'не играл' ))
+		cell = td(); row[ap](cell); cell[ap](d[text](result[3].tracks_finished_per_player[idx] || 'не играл' ))
+	}
+
+	fieldset[ap](summary_table)
+
+	var comment = args.comments && args.comments[args.players-1]
+	console.log(args, comment)
+	if (comment) {
+		fieldset[ap](comment)
+		comment.style.display = ''
+	}
+
+	this_target[ap](fieldset)
+}
+
+</script>
+
+<!--
+<p id="players2tracks4"></p>
+<p id="players2tracks3"></p>
+<script>
+	make_graph({ target: d.querySelector("#players2tracks4")})
+	make_graph({ target: d.querySelector("#players2tracks3"), tracks_per_player: 3 })
+</script>
+-->
+
+<p>Рассматриваем игру длиной в час. 30 треков по две минуты каждый. Если играем по 4, то рассматривам час и четыре минуты, потому что час ровно на блоки из 8-и минут не делится. Если кому-то сильно хочется посмотреть на сравнение где время совпадает один к одному, внизу есть табличка на 48 треков - полтора часа, которые ровно делятся и на 3 и на 4. В любом случае за час (с хвостиком) тратятся 8 кредитов, когда играем по 4 и 10 кредитов, если по 3.</p>
+<p>Под игроком подразумевается либо один на double либо пара. Естественно, если играет пара, то мы выбрасываем на ветер в два раза больше лишних кредитов.</p>
+
+<p id="result"></p>
+
+<p id="comment2" style="display: none">Внезапно! Два игрока сыграли поровну! Но выкинули по лишнему кредиту или по два, если игрок - это пара.</p>
+
+<p id="comment3" style="display: none">По четыре повезло двоим. По три - одному.</p>
+
+<p id="comment4" style="display: none">По четыре все сыграли ровно. По три - двое обламались. Кто там повторял заклинание "а можно сыграть лишний кредит?" Смотри: а можно и не сыграть.</p>
+
+<p id="comment5" style="display: none">Здесь наоборот. По три сыграли ровно.</p>
+
+<p id="comment6" style="display: none">Дальше комментировать бесполезно: вся разница только в том, что при одном раскладе обламываются одни игроки, а при другом - другие.</p>
+
+<script>
+for (var idx = 2; idx <= 10; idx++) {
+	make_legend({
+		target: d.querySelector("#result"),
+		players: idx,
+		comments: [
+			null, // для одного игрока
+			d.querySelector('#comment2'),
+			d.querySelector('#comment3'),
+			d.querySelector('#comment4'),
+			d.querySelector('#comment5'),
+			d.querySelector('#comment6'),
+		]
+	})
+}
+</script>
+
+<p>Результат, который был очевиден без всяких таблиц: при одних раскладах обламываются одни, при других - другие. Какой-то универсальной выгоды НЕТ. А вот кредитов сливаем больше.</p>
+<p>Товарищу, который повторял как заклинание "могу сыграть 6!": давай я тебе как в первом классе объясню:<br>
+Вот у тебя 12 яблок (треков). И вам начали по кругу отдавать по 4. Вас, детей - всего 3. Раз круг 12 яблок по четыре раздали.
+Но ты же первый в очереди сидишь и ты же думаешь, что ты - очень умный. Кричишь: "Давайте по три! Будет больше!"<br>
+Ок, стали раздавать по три: дали всем по три - т.е. 9, но теперь есть второй круг и тебе достаётся ещё.<br>
+И вот, ты сидишь и лыбишься: "ну ведь правда же я самый умный! У меня было всего 4, а стало 6, вот мой халявный кредит!"<br>
+Да вот только хуй: у тебя стало больше, потому что ты отнял у других и у них стало 3. Яблок (треков) как было 12 так и осталось. Из пустоты ни треки ни яблоки никакой магией деления ты не родишь, как не напрягайся.
+<br>
+<br>
+<br>
+<hr>
+Ниже таблица на полтора часа. Комментировать не буду - там выводы те же.
+<p id="result_equal"></p>
+<script>
+for (var idx = 2; idx <= 10; idx++) {
+	make_legend({ target: d.querySelector("#result_equal"), players: idx, tracks: 3*4*4 })
+}
+
+</script>
+
+</body>
+</html>
