@@ -2,6 +2,8 @@
 # I prefer https://play.google.com/store/apps/details?id=com.jasonkung.launcher3
 # If there's no launcher, you'll be left with empty screen and will have to install one through ADB.
 
+# Put it into %USERPROFILE%\Nox_share\Other and %USERPROFILE%\Nox_share\OtherShare.
+
 # Run as root inside new instance of Nox to block its ad/tracking through /etc/hosts
 # and remove its forced installation of Nox custom ad-packed launcher.
 
