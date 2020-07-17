@@ -1,0 +1,2 @@
+# Ctrl+`
+view.run_command('expand_tabs', {"set_translate_tabs": True});view.run_command('set_line_ending', {"type": "unix"});view.run_command('delete_trailing_spaces');view.run_command('save', {"encoding": "utf-8"})
