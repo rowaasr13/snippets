@@ -18,7 +18,7 @@ Object.keys(selectors).forEach((key) => {
 })
 
 let size = val.size.match(/^([\d.]+)/)
-val.size = size[1].replace(/\D/g, '') | 0
+val.size = parseInt(size[1].replace(/\D/g, ''), 10)
 
 let extension = val.extension.match(/^video file, (.+)$/)
 if (!extension) { throw "Can't get extension from type in data table" }
