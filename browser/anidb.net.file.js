@@ -8,6 +8,8 @@ const selectors = {
     extension: "tr.type>td.value",
     anime    : "tr.relation>td.value>a[href*='/anime/'",
     episode  : "tr.relation>td.value>a[href*='/episode/'",
+    group    : "tr.group>td.value>a[href*='/group/'",
+    quality  : "tr.quality>td.value",
 }
 
 let val = {}
@@ -24,7 +26,9 @@ let extension = val.extension.match(/^video file, (.+)$/)
 if (!extension) { throw "Can't get extension from type in data table" }
 val.extension = extension[1]
 
-let filename = encodeURIComponent(`${val.anime} - ${val.episode}.${val.extension}`)
+val.quality = val.quality.replace(/ \/[^\/]*\/ Version /, ' v')
+
+let filename = encodeURIComponent(`${val.anime} - ${val.episode} [${val.group}](${val.quality}).${val.extension}`)
 return `ed2k://|file|${filename}|${val.size}|${val.ed2k}|/`
 
 })()
