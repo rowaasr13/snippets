@@ -107,47 +107,74 @@ sub patch_git_config {
         SUFFIX => '.tmp'
     );
 
-    my $url;
-
     my $current_section = '';
+    my @line_parts;
+    my $val_idx;
+    my $changed;
+
+    # replace existing values in-place
     while (my $line = <$in>) {
         my ($key, $val);
         if ($line =~ /^\[(.+)\]$/) {
             $current_section = $1;
-        } elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.+)/) {
-            ($key, $val) = ($1, $2);
+            $tmp_out->print($line);
+            next;
+        } elsif ($line =~ /^(\s*)(\S+)(\s*=\s*)(\S.+)(\s*)$/) {
+            @line_parts = ($1, $2, $3, $4, $5);
+            $val_idx = 3;
+            ($key, $val) = @line_parts[1, $val_idx];
+        } else {
+            $tmp_out->print($line);
+            next;
         }
 
         if ($current_section eq 'remote "origin"' and $key and $key eq 'url') {
-            $url = $val;
-            next;
+            my $url = $val;
+            if ($url =~ m!^(?:https://github\.com/|git\@github\.com:)([^/]+)/(\S+)(\s*)$!) {
+                my ($user, $repo, $whitespace) = ($1, $2, $3);
+                $repo =~ s/\.git$//;
+                $url = "git\@github.com:$user/$repo.git$whitespace";
+                $env->{config}{$current_section}{$key} = $url;
+            }
         }
-        if ($current_section eq 'user' and $key and $key eq 'email') { next }
-        if ($current_section eq 'user' and $key and $key eq 'name') { next }
-        if ($current_section eq 'core' and $key and $key eq 'sshCommand') { next }
 
-        $tmp_out->print($line);
+        my $new_val;
+        if (defined $env->{config}{$current_section}) {
+            $new_val = delete $env->{config}{$current_section}{$key};
+            if (defined($new_val) and ($new_val eq $val)) { undef $new_val }
+        }
+
+        if (defined $new_val) {
+            $line_parts[$val_idx] = $new_val;
+            $tmp_out->print(@line_parts);
+            $changed = 1;
+        } else {
+            $tmp_out->print($line);
+        }
     }
 
-    $url =~ m!^(?:https://github\.com/|git\@github\.com:)([^/]+)/(.+)!;
-    my ($user, $repo) = ($1, $2);
-    $repo =~ s/\.git$//;
-
-    $tmp_out->print(map { $_, "\n" } (
-        '[remote "origin"]',
-        "   url = git\@github.com:$user/$repo.git",
-        '[user]',
-        "   email = $env->{config}{user}{email}",
-        "   name = $env->{config}{user}{name}",
-        '[core]',
-        "   sshCommand = $env->{config}{core}{sshCommand}",
-    ));
-
     close($in);
-    close($tmp_out);
-    rename($tmp_out, $git_config) or die "rename: $!";
 
-    return 1;
+    # write additional values
+    my $extra_newline_printed;
+    while (my ($section, $keys) = each %{$env->{config}}) {
+        unless (scalar keys %$keys) { next }
+
+        unless ($extra_newline_printed) { $tmp_out->print("\n"); $extra_newline_printed++ }
+
+        $tmp_out->print("[$section]\n");
+        $changed = 1;
+        while (my ($key, $val) = each %$keys) {
+            $tmp_out->print("\t$key = $val\n");
+        }
+    }
+
+    close($tmp_out);
+    if ($changed) {
+        rename($tmp_out, $git_config) or die "rename: $!";
+    }
+
+    return (1, "$git_config is " . ($changed ? 'changed' : 'unchanged'));
 }
 
 main();
