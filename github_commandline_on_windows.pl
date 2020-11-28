@@ -32,6 +32,7 @@ sub main {
     do_steps_array([
         check_if_we_are_in_git_repo => \&check_if_we_are_in_git_repo,
         check_git_version           => \&check_git_version,
+        read_json_config            => \&read_json_config,
         check_plink_version         => \&check_plink_version,
         try_plink_connect           => \&try_plink_connect,
         patch_git_config            => \&patch_git_config,
@@ -58,6 +59,23 @@ sub check_git_version {
     return
 }
 
+sub read_json_config {
+    my $env = shift;
+
+    use FindBin qw($Bin $Script);
+    use JSON qw(decode_json);
+    my $json_config = $Script;
+    $json_config =~ s/\.pl$/.json/i;
+    $json_config = catfile($Bin, $json_config);
+
+    open(my $fh, '<:utf8', $json_config) or die;
+    my $json_text;
+    while (defined (my $line = <$fh>)) { $json_text .= $line }
+    $env->{config} = decode_json($json_text);
+
+    return 1;
+}
+
 sub check_plink_version {
     return undef, "TODO";
 }
@@ -67,6 +85,8 @@ sub try_plink_connect {
 }
 
 sub patch_git_config {
+    my $env = shift;
+
     # TODO: if there's no changes, don't overwrite old config
 
     my $in;
@@ -108,10 +128,10 @@ sub patch_git_config {
         '[remote "origin"]',
         "   url = git\@github.com:$user/$repo.git",
         '[user]',
-        "   email = rowaasr13\@gmail.com",
-        "   name = (rowaasr13) Oleg V. Volkov",
+        "   email = $env->{config}{user}{email}",
+        "   name = $env->{config}{user}{name}",
         '[core]',
-        "   sshCommand = C:/bin/PuTTY/PLINK.EXE -v",
+        "   sshCommand = $env->{config}{core}{sshCommand}",
     ));
 
     close($in);

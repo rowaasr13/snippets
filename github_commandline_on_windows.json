@@ -1,0 +1,9 @@
+{
+    "user": {
+        "email": "rowaasr13@gmail.com",
+        "name": "(rowaasr13) Oleg V. Volkov"
+    },
+    "core": {
+        "sshCommand": "C:/bin/PuTTY/PLINK.EXE -v"
+    }
+}
