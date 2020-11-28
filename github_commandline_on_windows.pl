@@ -3,15 +3,39 @@ use warnings;
 use Capture::Tiny qw(capture);
 use File::Spec::Functions qw(catfile);
 use File::Temp;
+use Win32::Console::ANSI;
+use Term::ANSIColor qw(colored);
 
 my $git_config = catfile('.git', 'config');
 
+sub do_steps_array {
+    my $steps = shift;
+
+    my $env = {};
+
+    for (my $idx = 0; $idx < scalar(@$steps); $idx += 2) {
+        my ($name, $sub) = @{$steps}[$idx, $idx + 1];
+
+        my ($res, $message) = $sub->($env);
+        if (defined $res) {
+            print '[', colored(' OK ', 'green'), "] $name\n";
+        } elsif ($message and $message eq 'TODO') {
+            print '[', colored('TODO', 'white'), "] $name\n";
+        } else {
+            print '[', colored('FAIL', 'red'  ), "] $name\n";
+            exit(($idx / 2) + 1);
+        }
+    }
+}
+
 sub main {
-    check_if_we_are_in_git_repo();
-    check_git_version() or exit(1);
-    check_plink_version();
-    try_plink_connect();
-    patch_git_config();
+    do_steps_array([
+        check_if_we_are_in_git_repo => \&check_if_we_are_in_git_repo,
+        check_git_version           => \&check_git_version,
+        check_plink_version         => \&check_plink_version,
+        try_plink_connect           => \&try_plink_connect,
+        patch_git_config            => \&patch_git_config,
+    ]);
 
     print "All done.\n";
     exit(0);
@@ -35,11 +59,11 @@ sub check_git_version {
 }
 
 sub check_plink_version {
-
+    return undef, "TODO";
 }
 
 sub try_plink_connect {
-
+    return undef, "TODO";
 }
 
 sub patch_git_config {
