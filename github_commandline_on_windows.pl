@@ -17,14 +17,23 @@ sub do_steps_array {
         my ($name, $sub) = @{$steps}[$idx, $idx + 1];
 
         my ($res, $message) = $sub->($env);
+        my $need_exit;
+
         if (defined $res) {
-            print '[', colored(' OK ', 'green'), "] $name\n";
+            print '[', colored(' OK ', 'green'), "] ";
         } elsif ($message and $message eq 'TODO') {
-            print '[', colored('TODO', 'white'), "] $name\n";
+            print '[', colored('TODO', 'white'), "] ";
+            undef $message
         } else {
-            print '[', colored('FAIL', 'red'  ), "] $name\n";
-            exit(($idx / 2) + 1);
+            print '[', colored('FAIL', 'red'  ), "] ";
+            $need_exit = ($idx / 2) + 1;
         }
+
+        print "$name\n";
+        if (defined $message) {
+            print "\t $message\n";
+        }
+        if ($need_exit) { exit ($need_exit) }
     }
 }
 
