@@ -34,4 +34,10 @@
 
     target = document.querySelector("#page-content")
     if (target) { target.style.paddingRight = 'unset' }
+
+    if (document.body.getAttribute("data-fullscreen-mode") != "true") {
+        target = document.querySelector('.header-user-fullscreen')
+        target && target.click()
+    }
+
 })();
