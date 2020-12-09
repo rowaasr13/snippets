@@ -29,6 +29,10 @@
     target = document.querySelector("#video-pos-static")
     target && target.remove()
 
+    document.querySelectorAll(".zamaf-bt").forEach(target => {
+        target.childElementCount === 0 && target.remove()
+    })
+
     find_and_climb_to_parent('#ad-horizontal', '.blocks')
     find_and_climb_to_parent('#ad-vertical', '.sidebar-wrapper')
 
