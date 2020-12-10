@@ -15,6 +15,9 @@
         target = document.getElementById("footer")
         if (target) { target.remove() }
 
+        target = document.getElementById("resize_message")
+        if (target) { target.style.margin = "0px" }
+
         target = document.body
         if (target) {
             let nodeIterator = document.createNodeIterator(document.body, NodeFilter.SHOW_COMMENT)
@@ -31,7 +34,10 @@
 
         target = document.querySelector('.boxbody>img')
         if (target) {
+            let boxbody = target.parentElement
             let src = target.src
+
+            boxbody.style.padding = "unset"
 
             let onclick = target.getAttribute("onclick")
             let url_match
@@ -45,7 +51,7 @@
 
             let link = document.createElement('a')
             link.href = src
-            target.parentElement.appendChild(link)
+            boxbody.appendChild(link)
             link.appendChild(target)
         }
     }
