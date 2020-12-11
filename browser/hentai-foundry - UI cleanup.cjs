@@ -1,6 +1,10 @@
 ;(function() {
     let main = function() {
-        let target = document.getElementById("logo")
+        let target = document.getElementById("frontPage_link")
+        // TODO: see about extending re-netry period; probably just a cookie
+        if (target) { return target.click() }
+
+        target = document.getElementById("logo")
         if (target) { target.parentElement.remove() }
 
         target = document.getElementById("searchBox")
