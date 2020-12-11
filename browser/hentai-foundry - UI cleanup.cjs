@@ -4,6 +4,23 @@
         // TODO: see about extending re-netry period; probably just a cookie
         if (target) { return target.click() }
 
+        let changed_form
+        document.querySelectorAll('input.ratingCheckbox').forEach(input => {
+            let desired_state = input.id.match(/scat|yaoi/) ? false : true
+            if ((!!input.checked) != desired_state) {
+                changed_form = input.form; console.log("changed", input.id)
+                input.click()
+            }
+        })
+        if (changed_form) {
+            let submit = changed_form.querySelectorAll("input[type='submit']")
+            if (submit.length === 1) {
+                submit[0].click()
+            } else {
+                console.log("more than one submit in filter", changed_form)
+            }
+        }
+
         target = document.getElementById("logo")
         if (target) { target.parentElement.remove() }
 
