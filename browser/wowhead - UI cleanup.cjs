@@ -47,4 +47,6 @@
     target = document.querySelector(".header-expand-site")
     target && target.click()
 
+    document.querySelectorAll("[id$='ad-manager']").forEach(target => target.remove())
+
 })();
