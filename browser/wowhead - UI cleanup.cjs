@@ -44,4 +44,7 @@
         target && target.click()
     }
 
+    target = document.querySelector(".header-expand-site")
+    target && target.click()
+
 })();
