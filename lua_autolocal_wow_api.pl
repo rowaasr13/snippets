@@ -24,6 +24,7 @@ while ("
     local tinsert = table.insert
     local tremove = table.remove
     local tsort = table.sort
+    assert
     next
     pairs
     print
@@ -66,6 +67,7 @@ while ("
     GetInventoryItemID
     GetInventorySlotInfo
     GetItemCooldown
+    GetItemCount
     GetItemInfo
     GetItemInfoInstant
     GetLFGDungeonEncounterInfo
@@ -99,6 +101,7 @@ while ("
     IsInRaid
     IsItemInRange
     IsMounted
+    IsPlayerSpell
     IsQuestFlaggedCompleted
     IsShiftKeyDown
     IsSpellInRange
@@ -228,6 +231,9 @@ while ("
 
     -- Blizzard C_CurrencyInfo
     GetCurrencyInfo = C_CurrencyInfo.GetCurrencyInfo
+
+    -- Blizzard C_Item
+    C_Item
 
     -- Blizzard Enum w/ legacy
     LE_FOLLOWER_TYPE_GARRISON_6_0 = Enum.GarrisonFollowerType.FollowerType_6_0
