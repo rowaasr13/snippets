@@ -9,9 +9,9 @@ use Term::ANSIColor qw(colored);
 my $git_config = catfile('.git', 'config');
 
 sub do_steps_array {
-    my $steps = shift;
+    my ($steps, $env) = @_;
 
-    my $env = {};
+    $env //= {};
 
     for (my $idx = 0; $idx < scalar(@$steps); $idx += 2) {
         my ($name, $sub) = @{$steps}[$idx, $idx + 1];
@@ -38,6 +38,12 @@ sub do_steps_array {
 }
 
 sub main {
+    if ($ARGV[0] and $ARGV[0] eq 'clone') {
+        if ($ARGV[1]) {
+            return generate_clone_command($ARGV[1])
+        }
+    }
+
     do_steps_array([
         check_if_we_are_in_git_repo => \&check_if_we_are_in_git_repo,
         check_git_version           => \&check_git_version,
@@ -46,6 +52,21 @@ sub main {
         try_plink_connect           => \&try_plink_connect,
         patch_git_config            => \&patch_git_config,
     ]);
+
+    print "All done.\n";
+    exit(0);
+}
+
+sub generate_clone_command {
+    my $origin = shift;
+
+    do_steps_array([
+        check_git_version           => \&check_git_version,
+        read_json_config            => \&read_json_config,
+        check_plink_version         => \&check_plink_version,
+        try_plink_connect           => \&try_plink_connect,
+        system_clone_command        => \&system_clone_command,
+    ], { repo => $origin});
 
     print "All done.\n";
     exit(0);
@@ -182,6 +203,20 @@ sub patch_git_config {
     }
 
     return (1, "$git_config is " . ($changed ? 'changed' : 'unchanged'));
+}
+
+sub win_cmdline_quote {
+    my $str = shift;
+
+    return "\"$str\"";
+}
+
+sub system_clone_command {
+    my $env = shift;
+
+    my $repo = normalize_git_repo_to_ssh($env->{repo});
+
+    return (1, "git -c core.sshCommand=" . win_cmdline_quote($env->{config}{core}{sshCommand}) . " clone $repo");
 }
 
 main();
