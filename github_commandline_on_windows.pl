@@ -93,6 +93,18 @@ sub try_plink_connect {
     return undef, "TODO";
 }
 
+sub normalize_git_repo_to_ssh {
+    my $url = shift;
+
+    if ($url =~ m!^(?:https://github\.com/|git\@github\.com:)([^/]+)/(\S+)(\s*)$!) {
+        my ($user, $repo, $whitespace) = ($1, $2, $3);
+        $repo =~ s/\.git$//;
+        return "git\@github.com:$user/$repo.git$whitespace";
+    }
+
+    return;
+}
+
 sub patch_git_config {
     my $env = shift;
 
@@ -127,11 +139,8 @@ sub patch_git_config {
         }
 
         if ($current_section eq 'remote "origin"' and $key and $key eq 'url') {
-            my $url = $val;
-            if ($url =~ m!^(?:https://github\.com/|git\@github\.com:)([^/]+)/(\S+)(\s*)$!) {
-                my ($user, $repo, $whitespace) = ($1, $2, $3);
-                $repo =~ s/\.git$//;
-                $url = "git\@github.com:$user/$repo.git$whitespace";
+            my $url = normalize_git_repo_to_ssh($val);
+            if ($url) {
                 $env->{config}{$current_section}{$key} = $url;
             }
         }
