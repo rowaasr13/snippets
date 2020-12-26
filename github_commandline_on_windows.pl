@@ -96,8 +96,6 @@ sub try_plink_connect {
 sub patch_git_config {
     my $env = shift;
 
-    # TODO: if there's no changes, don't overwrite old config
-
     my $in;
     unless(open($in, '<', $git_config)) { return }
 
