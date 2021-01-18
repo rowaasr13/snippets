@@ -1,5 +1,36 @@
 ;(function() {
+    function redirect_to_canonical_https() {
+        let new_url = new URL(location)
+        let new_url_replace
+        let hf_pattern = /hentai-foundry.com$/i;
+
+        if (!new_url.host.match(hf_pattern)) {
+            let params = new URLSearchParams(new_url.search)
+            let url_from_params = params.get('url')
+            if (url_from_params) {
+                if (!url_from_params.match("https?://")) {
+                    url_from_params = "https://" + url_from_params
+                }
+                new_url = new URL(url_from_params)
+                new_url_replace = true
+            }
+        }
+
+        if (new_url.host.match(hf_pattern) && new_url.protocol == 'http:') {
+            new_url.protocol = "https:"
+            new_url_replace = true
+        }
+
+        if (new_url_replace) {
+            location.replace(new_url)
+        }
+
+        return new_url_replace
+    }
+
     let main = function() {
+        if (redirect_to_canonical_https()) { return }
+
         let target = document.getElementById("frontPage_link")
         // TODO: see about extending re-netry period; probably just a cookie
         if (target) { return target.click() }
