@@ -1,4 +1,5 @@
 ;(function() {
+
     function redirect_to_canonical_https() {
         let new_url = new URL(location)
         let new_url_replace
@@ -32,7 +33,7 @@
         if (redirect_to_canonical_https()) { return }
 
         let target = document.getElementById("frontPage_link")
-        // TODO: see about extending re-netry period; probably just a cookie
+        // TODO: see about extending re-entry period; probably just a cookie
         if (target) { return target.click() }
 
         if (!(location && location.pathname.match(/^\/search\//))) {
@@ -115,4 +116,5 @@
     } else {
         window.addEventListener("DOMContentLoaded", main)
     }
+
 })();
