@@ -109,11 +109,11 @@ while ("
     IsSubmerged
     IsSwimming
     IsUsableSpell
-    ItemLocation
     ITEM_QUALITY_COLORS
     ITEM_SOULBOUND
     ITEM_SPELL_KNOWN
     ITEM_SPELL_TRIGGER_ONUSE
+    ItemLocation
     LE_ITEM_BIND_NONE
     LE_ITEM_BIND_ON_ACQUIRE
     LE_ITEM_BIND_ON_EQUIP
