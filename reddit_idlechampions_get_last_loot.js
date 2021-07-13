@@ -5,10 +5,9 @@ async function main() {
     let https = require('https')
 
     let url_search_loot = 'https://www.reddit.com/r/idlechampions/search.json?q=flair_name%3A%22loot%22&restrict_sr=1&sort=new'
-    let code_one_letter_range = '0-9A-Za-z!'
+    let code_one_letter_range = '0-9A-Za-z!*&^%#@'
 
     let code_one_letter_rx = '[' + code_one_letter_range + ']'
-    let code_one_letter_not_rx = '[^' + code_one_letter_range + ']'
 
     let patterns = [
         // 4 groups of XXXX (4 X) joined by '-': i.e. XXXX-XXXX-XXXX-XXXX
