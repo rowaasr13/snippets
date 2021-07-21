@@ -1,15 +1,12 @@
 // not a module format, so you can run it in online compilers
 "use strict";
 
-async function main() {
-    let https = require('https')
+const code_one_letter_range = '0-9A-Za-z!*&^%#@'
 
-    let url_search_loot = 'https://www.reddit.com/r/idlechampions/search.json?q=flair_name%3A%22loot%22&restrict_sr=1&sort=new'
-    let code_one_letter_range = '0-9A-Za-z!*&^%#@'
+function get_code_patterns() {
+    const code_one_letter_rx = '[' + code_one_letter_range + ']'
 
-    let code_one_letter_rx = '[' + code_one_letter_range + ']'
-
-    let patterns = [
+    const patterns = [
         // 4 groups of XXXX (4 X) joined by '-': i.e. XXXX-XXXX-XXXX-XXXX
         Array(4).fill(code_one_letter_rx + '{4}').join("\\-"),
         // 3 groups of --""--
@@ -20,10 +17,17 @@ async function main() {
         code_one_letter_rx + '{12}',
     ]
     patterns.forEach((val, idx, array) => array[idx] = '\\b(' + val + ')\\b')
-    let all_patterns = RegExp(patterns.join('|'))
+    const all_patterns = RegExp(patterns.join('|'))
 
-    // console.log(patterns, all_patterns)
-    // exit(0)
+    return all_patterns
+}
+
+async function main() {
+    const https = require('https')
+
+    const url_search_loot = 'https://www.reddit.com/r/idlechampions/search.json?q=flair_name%3A%22loot%22&restrict_sr=1&sort=new'
+
+    const all_patterns = get_code_patterns()
 
     function https_get_promise(url, resolve, reject) {
         return https.get(url_search_loot, (res) => {
