@@ -16,7 +16,12 @@ function get_code_patterns() {
         // 12 X
         code_one_letter_rx + '{12}',
     ]
-    patterns.forEach((val, idx, array) => array[idx] = '\\b(' + val + ')\\b')
+    patterns.forEach((val, idx, array) => {
+        array[idx] =
+            '(?:^|(?<!' + code_one_letter_rx  + '))' + // boundary or start of line lookbehind
+            '(' + val + ')' +                          // pattern
+            '(?:$|(?!' + code_one_letter_rx + '))'     // boundary or end of line lookahead
+    })
     const all_patterns = RegExp(patterns.join('|'))
 
     return all_patterns
