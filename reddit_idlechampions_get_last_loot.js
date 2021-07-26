@@ -76,7 +76,7 @@ async function main() {
     reddit_obj.data.children.forEach((post, idx) => {
         // console.log(post.data.selftext)
 
-        let match = post.data.selftext.match(all_patterns)
+        let match = post.data.selftext.replaceAll("&amp;", "&").match(all_patterns)
         if (!match) {
             errors.push(post)
         } else {
