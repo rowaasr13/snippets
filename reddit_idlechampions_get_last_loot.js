@@ -58,6 +58,19 @@ async function get_reddit_posts() {
     return res
 }
 
+function push_code(array, code, data) {
+    const normalized = code.replace(/\-/g, '').toLowerCase()
+    const exists = array.uniq[normalized]
+
+    if (exists) { return }
+
+    array.push(code)
+}
+
+function push_error(array, data) {
+    array.push(data)
+}
+
 async function main() {
     const all_patterns = get_code_patterns()
 
@@ -72,24 +85,34 @@ async function main() {
     // console.log(reddit_obj)
     // console.log(reddit_obj.data.children)
 
-    let errors = []
+    const codes = []
+    codes.uniq = {}
+    const errors = []
+
     reddit_obj.data.children.forEach((post, idx) => {
         // console.log(post.data.selftext)
 
         // mycompiler.io's nodejs doesn't have .replaceAll
         const match = post.data.selftext.replace(/&amp;/g, "&").match(all_patterns)
         if (!match) {
-            errors.push(post)
+            push_error(errors, { text: post.data.selftext, source_type: 'reddit', source: post })
         } else {
-            console.log(match[0])
+            push_code(codes, match[0], { source_type: 'reddit', source: post })
         }
     })
 
+    if (codes.length > 0) {
+        for (const code of codes) {
+            console.log(code)
+        }
+    }
+
     if (errors.length > 0) {
         console.log("\n\n\n=== Errors ===")
-        for (const post of errors) {
-            console.log(post.data.selftext)
-            console.log('======')
+        for (const error of errors) {
+            console.log('=== Reddit parse error ===')
+            console.log(error.text)
+
         }
     }
 }
