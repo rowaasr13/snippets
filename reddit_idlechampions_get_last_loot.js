@@ -4,7 +4,8 @@
 const url_reddit_search_loot = 'https://www.reddit.com/r/idlechampions/search.json?q=flair_name%3A%22loot%22&restrict_sr=1&sort=new'
 const code_one_letter_range = '0-9A-Za-z*&^%$#@!'
 
-const https = require('https')
+let fetch = globalThis.fetch
+if (!fetch) { fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args)) }
 
 function get_code_patterns() {
     const code_one_letter_rx = '[' + code_one_letter_range + ']'
@@ -30,31 +31,9 @@ function get_code_patterns() {
     return all_patterns
 }
 
-function https_request_add_promise(url, options, resolve, reject) {
-    let request = https.get(url, options, (res) => {
-        let data = '';
-
-        res.on('data', (chunk) => data += chunk)
-
-        res.on('end', () => {
-            res.data = data
-            resolve(res)
-        })
-    }).on('error', (err) => reject(err))
-
-    return request
-}
-
 async function get_reddit_posts() {
-    const request = new Promise((resolve, reject) => https_request_add_promise(
-        url_reddit_search_loot,
-        {},
-        resolve, reject
-    ))
-    const res = request.then(res => {
-        const obj = JSON.parse(res.data)
-        return obj
-    })
+    const request = fetch(url_reddit_search_loot)
+    const res = request.then(res => res.json() )
     return res
 }
 
