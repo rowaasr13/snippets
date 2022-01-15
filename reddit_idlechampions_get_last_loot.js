@@ -71,6 +71,16 @@ function push_error(array, data) {
     array.push(data)
 }
 
+const document_body = (typeof document !== 'undefined') && document.body
+const println = document_body ? function(...args) {
+    const text = document.createTextNode([...args].join(' '))
+    const wrapper = document.createElement('div')
+    wrapper.appendChild(text)
+    document_body.appendChild(wrapper)
+} : function(...args) {
+    console.log(...args)
+}
+
 async function main() {
     const all_patterns = get_code_patterns()
 
@@ -103,15 +113,15 @@ async function main() {
 
     if (codes.length > 0) {
         for (const code of codes) {
-            console.log(code)
+            println(code)
         }
     }
 
     if (errors.length > 0) {
-        console.log("\n\n\n=== Errors ===")
+        println("\n\n\n=== Errors ===")
         for (const error of errors) {
-            console.log('=== Reddit parse error ===')
-            console.log(error.text)
+            println('=== Reddit parse error ===')
+            println(error.text)
 
         }
     }
