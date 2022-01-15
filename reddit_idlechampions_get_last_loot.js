@@ -2,7 +2,7 @@
 "use strict";
 
 const url_reddit_search_loot = 'https://www.reddit.com/r/idlechampions/search.json?q=flair_name%3A%22loot%22&restrict_sr=1&sort=new'
-const code_one_letter_range = '0-9A-Za-z!*&^%#@'
+const code_one_letter_range = '0-9A-Za-z*&^%$#@!'
 
 const https = require('https')
 
