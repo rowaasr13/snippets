@@ -12,9 +12,9 @@ function get_code_patterns() {
 
     const patterns = [
         // 4 groups of XXXX (4 X) joined by '-': i.e. XXXX-XXXX-XXXX-XXXX
-        Array(4).fill(code_one_letter_rx + '{4}').join("\\-"),
+        Array(4).fill(code_one_letter_rx + '{4}').join("[\\-_]"),
         // 3 groups of --""--
-        Array(3).fill(code_one_letter_rx + '{4}').join("\\-"),
+        Array(3).fill(code_one_letter_rx + '{4}').join("[\\-_]"),
         // 16 X - i.e. just as first pattern, but without '-' delmiters
         code_one_letter_rx + '{16}',
         // 12 X
@@ -38,7 +38,7 @@ async function get_reddit_posts() {
 }
 
 function push_code(array, code, data) {
-    const normalized = code.replace(/\-/g, '').toLowerCase()
+    const normalized = code.replace(/[\-_]/g, '').toLowerCase()
     const exists = array.uniq[normalized]
 
     if (exists) { return }
