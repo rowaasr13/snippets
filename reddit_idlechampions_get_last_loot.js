@@ -80,9 +80,10 @@ async function main() {
 
     reddit_obj.data.children.forEach((post, idx) => {
         // console.log(post.data.selftext)
+        post.data.selftext = post.data.selftext.replace(/&amp;/g, "&")
+        const html = post.data.selftext_html.replace(/&[a-z]{1,5};/g, function(entity) { return entity === '&amp;' ? '&' : ' ' }).replace(/&amp;/g, "&")
+        const match = html.match(all_patterns)
 
-        // mycompiler.io's nodejs doesn't have .replaceAll
-        const match = post.data.selftext.replace(/&amp;/g, "&").match(all_patterns)
         if (!match) {
             push_error(errors, { text: post.data.selftext, source_type: 'reddit', source: post })
         } else {
