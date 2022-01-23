@@ -42,6 +42,7 @@ function push_code(array, code, data) {
     const exists = array.uniq[normalized]
 
     if (exists) { return }
+    array.uniq[normalized] = true
 
     array.push(code)
 }
