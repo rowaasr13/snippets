@@ -26,7 +26,7 @@ function get_code_patterns() {
             '(' + val + ')' +                          // pattern
             '(?:$|(?!' + code_one_letter_rx + '))'     // boundary or end of line lookahead
     })
-    const all_patterns = RegExp(patterns.join('|'))
+    const all_patterns = new RegExp(patterns.join('|'), 'g')
 
     return all_patterns
 }
@@ -83,12 +83,15 @@ async function main() {
         // console.log(post.data.selftext)
         post.data.selftext = post.data.selftext.replace(/&amp;/g, "&")
         const html = post.data.selftext_html.replace(/&[a-z]{1,5};/g, function(entity) { return entity === '&amp;' ? '&' : ' ' }).replace(/&amp;/g, "&")
-        const match = html.match(all_patterns)
 
-        if (!match) {
-            push_error(errors, { text: post.data.selftext, source_type: 'reddit', source: post })
-        } else {
+        let match, had_match
+        while ((match = all_patterns.exec(html)) !== null) {
+            had_match = true
             push_code(codes, match[0], { source_type: 'reddit', source: post })
+        }
+
+        if (!had_match) {
+            push_error(errors, { text: post.data.selftext, source_type: 'reddit', source: post })
         }
     })
 
