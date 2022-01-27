@@ -50,6 +50,23 @@ function push_error(array, data) {
     array.push(data)
 }
 
+function push_codes_from_text(args) {
+    const env = this
+    const patterns = env.patterns
+    let text = args.text.replace(/&amp;/g, "&")
+    let log_text = (args.log_text || args.text).replace(/&amp;/g, "&")
+
+    let match, had_match
+    while ((match = patterns.exec(text)) !== null) {
+        had_match = true
+        push_code(env.codes, match[0], { source_id: args.source, raw: args.raw })
+    }
+
+    if (!had_match) {
+        push_error(env.errors, { text: args.log_text, source_id: args.source, raw: args.raw })
+    }
+}
+
 const document_body = (typeof document !== 'undefined') && document.body
 const println = document_body ? function(...args) {
     const text = document.createTextNode([...args].join(' '))
@@ -77,21 +94,16 @@ async function main() {
     const codes = []
     codes.uniq = {}
     const errors = []
+    const env = {
+        patterns: all_patterns,
+        codes: codes,
+        errors: errors,
+        push_codes_from_text: push_codes_from_text
+    }
 
     reddit_obj.data.children.forEach((post, idx) => {
-        // console.log(post.data.selftext)
-        post.data.selftext = post.data.selftext.replace(/&amp;/g, "&")
-        const html = post.data.selftext_html.replace(/&[a-z]{1,5};/g, function(entity) { return entity === '&amp;' ? '&' : ' ' }).replace(/&amp;/g, "&")
-
-        let match, had_match
-        while ((match = all_patterns.exec(html)) !== null) {
-            had_match = true
-            push_code(codes, match[0], { source_type: 'reddit', source: post })
-        }
-
-        if (!had_match) {
-            push_error(errors, { text: post.data.selftext, source_type: 'reddit', source: post })
-        }
+        const html = post.data.selftext_html.replace(/&[a-z]{1,5};/g, function(entity) { return entity === '&amp;' ? '&' : ' ' })
+        env.push_codes_from_text({ name: 'Reddit', text: html, log_text: post.data.selftext, raw: post })
     })
 
     if (codes.length > 0) {
