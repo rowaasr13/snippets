@@ -14,10 +14,10 @@ function get_code_patterns() {
         Array(4).fill(code_one_letter_rx + '{4}').join("[\\-_]"),
         // 3 groups of --""--
         Array(3).fill(code_one_letter_rx + '{4}').join("[\\-_]"),
-        // 16 X - i.e. just as first pattern, but without '-' delmiters
-        code_one_letter_rx + '{16}',
+        // 16 X with optional delimiters after each symbol
+        Array(16).fill(code_one_letter_rx).join("\\-?"),
         // 12 X
-        code_one_letter_rx + '{12}',
+        Array(12).fill(code_one_letter_rx).join("\\-?"),
     ]
     patterns.forEach((val, idx, array) => {
         array[idx] =
