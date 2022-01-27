@@ -56,6 +56,9 @@ function push_codes_from_text(args) {
     let text = args.text.replace(/&amp;/g, "&")
     let log_text = (args.log_text || args.text).replace(/&amp;/g, "&")
 
+    // do not try to parse known channel names that just happen to match code format
+    text = text.replace(/twitch\.tv\/(?:demiplanerpg|dungeonscrawlers)/ig, '')
+
     let match, had_match
     while ((match = patterns.exec(text)) !== null) {
         had_match = true
