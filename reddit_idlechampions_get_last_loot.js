@@ -1,4 +1,3 @@
-// not a module format, so you can run it in online compilers
 "use strict";
 
 const url_reddit_search_loot = 'https://www.reddit.com/r/idlechampions/search.json?q=flair_name%3A%22loot%22&restrict_sr=1&sort=new'
@@ -64,7 +63,7 @@ const println = document_body ? function(...args) {
 async function main() {
     const all_patterns = get_code_patterns()
 
-    let reddit_obj, discord_obj
+    let reddit_obj
 
     await Promise.all(
         [ get_reddit_posts() ]
