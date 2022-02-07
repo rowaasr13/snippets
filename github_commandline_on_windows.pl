@@ -98,7 +98,7 @@ sub read_json_config {
     $json_config =~ s/\.pl$/.json/i;
     $json_config = catfile($Bin, $json_config);
 
-    open(my $fh, '<:utf8', $json_config) or die;
+    open(my $fh, '<:utf8', $json_config) or die "can't open $json_config: $!";
     my $json_text;
     while (defined (my $line = <$fh>)) { $json_text .= $line }
     $env->{config} = decode_json($json_text);
