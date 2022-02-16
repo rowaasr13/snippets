@@ -106,6 +106,7 @@ async function main() {
 
     reddit_obj.data.children.forEach((post, idx) => {
         let html = post.data.selftext_html
+        if (!html) { return }
         html = html.replace(/&amp;/g, '&')
         html = html.replace(/&#?[0-9a-z]{1,5};/gi, function(entity) { return entity === '&amp;' ? '&' : ' ' })
         env.push_codes_from_text({ name: 'Reddit', text: html, log_text: post.data.selftext, raw: post })
