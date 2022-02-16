@@ -9,7 +9,9 @@ if (!fetch) { fetch = (...args) => import('node-fetch').then(({default: fetch}) 
 function get_code_patterns() {
     const code_one_letter_rx = '[' + code_one_letter_range + ']'
 
-    const patterns = [
+    const patterns = {}
+
+    const txt_patterns = [
         // 4 groups of XXXX (4 X) joined by '-': i.e. XXXX-XXXX-XXXX-XXXX
         Array(4).fill(code_one_letter_rx + '{4}').join("[\\-_]"),
         // 3 groups of --""--
@@ -19,15 +21,24 @@ function get_code_patterns() {
         // 12 X
         Array(12).fill(code_one_letter_rx).join("\\-?"),
     ]
-    patterns.forEach((val, idx, array) => {
+    txt_patterns.forEach((val, idx, array) => {
         array[idx] =
             '(?:^|(?<!' + code_one_letter_rx  + '))' + // boundary or start of line lookbehind
             '(' + val + ')' +                          // pattern
             '(?:$|(?!' + code_one_letter_rx + '))'     // boundary or end of line lookahead
     })
-    const all_patterns = new RegExp(patterns.join('|'), 'g')
+    patterns.txt = new RegExp(txt_patterns.join('|'), 'g')
 
-    return all_patterns
+    const md_patterns = [
+        // 16 X with optional delimiters after each symbol + markdown bold (double asterisk on each side)
+        '\\*\\*(' + Array(16).fill(code_one_letter_rx).join("\\-?") + ')\\*\\*',
+        // 12 X
+        '\\*\\*(' + Array(12).fill(code_one_letter_rx).join("\\-?") + ')\\*\\*',
+    ]
+    patterns.md  = new RegExp(md_patterns.join('|'), 'g')
+    patterns.md.group_count = md_patterns.length
+
+    return patterns
 }
 
 async function get_reddit_posts() {
@@ -59,10 +70,28 @@ function push_codes_from_text(args) {
     // do not try to parse known channel names that just happen to match code format
     text = text.replace(/twitch\.tv\/(?:demiplanerpg|dungeonscrawlers)/ig, '')
 
-    let match, had_match
-    while ((match = patterns.exec(text)) !== null) {
-        had_match = true
-        push_code(env.codes, match[0], { source_id: args.source, raw: args.raw })
+    let had_match
+    const types = args.types
+    const types_count = (types && types.length) || 0
+    for (let idx = -1; idx < types_count; idx++) {
+        let type = idx === -1 ? 'txt' : types[idx]
+        const pattern_type_data = patterns[type]
+
+        let match_data
+        while ((match_data = pattern_type_data.exec(text)) !== null) {
+            had_match = true
+            let match
+
+            let group_count = pattern_type_data.group_count
+            if (group_count) {
+                for (let idx = 1; idx <= group_count; idx++) {
+                    if (match_data[idx]) { match = match_data[idx]; break }
+                }
+            } else {
+                match = match_data[0]
+            }
+            push_code(env.codes, match, { source_id: args.source, pattern_type: type, raw: args.raw })
+        }
     }
 
     if (!had_match) {
@@ -106,10 +135,17 @@ async function main() {
 
     reddit_obj.data.children.forEach((post, idx) => {
         let html = post.data.selftext_html
-        if (!html) { return }
-        html = html.replace(/&amp;/g, '&')
-        html = html.replace(/&#?[0-9a-z]{1,5};/gi, function(entity) { return entity === '&amp;' ? '&' : ' ' })
-        env.push_codes_from_text({ name: 'Reddit', text: html, log_text: post.data.selftext, raw: post })
+        if (html) {
+            html = html.replace(/&amp;/g, '&')
+            html = html.replace(/&#?[0-9a-z]{1,5};/gi, function(entity) { return entity === '&amp;' ? '&' : ' ' })
+            env.push_codes_from_text({ name: 'Reddit', text: html, log_text: post.data.selftext, raw: post })
+        } else {
+            let title = post.data.title
+            if (title) {
+                title = title.replace(/&amp;/g, '&')
+                env.push_codes_from_text({ name: 'Reddit', text: title, types: [ 'md' ], raw: post })
+            }
+        }
     })
 
     if (codes.length > 0) {
