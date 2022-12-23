@@ -3,12 +3,23 @@
 (function() {
   var search = location.search
   if (!search) { return }
+
   var match = search.match(/^\?1\/([^\/]+)\/([^\/]+)\/(\d+)\/(\d+)/)
-  console.log("match", match)
+  console.log("match/1", match)
   if (match) {
     var link = 'https://www.quora.com/'+match[1]+'/answer/'+match[2]+'?comment_id='+match[3]+'&comment_type='+match[4]
     console.log("link", link)
     location.replace(link)
+    return
+  }
+
+  var match = search.match(/^\?1%2F([^\/]+)%2F([^\/]+)%2F(\d+)%2F(\d+)/)
+  console.log("match/1 %2F", match)
+  if (match) {
+    var link = 'https://www.quora.com/'+match[1]+'/answer/'+match[2]+'?comment_id='+match[3]+'&comment_type='+match[4]
+    console.log("link", link)
+    location.replace(link)
+    return
   }
 })()
 </script></head><body></body></html>
