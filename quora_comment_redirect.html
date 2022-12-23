@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html><head><title>Quora comment link</title><script>
+(function() {
+  var search = location.search
+  if (!search) { return }
+  var match = search.match(/^\?1\/([^\/]+)\/([^\/]+)\/(\d+)\/(\d+)/)
+  console.log("match", match)
+  if (match) {
+    var link = 'https://www.quora.com/'+match[1]+'/answer/'+match[2]+'?comment_id='+match[3]+'&comment_type='+match[4]
+    console.log("link", link)
+    location.replace(link)
+  }
+})()
+</script></head><body></body></html>
